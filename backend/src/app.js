@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
-const routs = require('./routes/feedbackRouters');
+const feedbackRouts = require('./routes/feedbackRouters');
+const attendanceRouts = require('./routes/attendanceRouters');
 
 //dabase connection
 const getConnection  = require('./config/db');
@@ -16,8 +17,8 @@ app.get('/', (req,res)=>{
     res.send('Backend is running !');
 })
 
-app.use('/api', routs);
-
+app.use('/feedback', feedbackRouts);
+app.use('/attendance', attendanceRouts);
 app.get('/hi', (req,res)=>{
     res.send('Backend is running  hi!');
 })

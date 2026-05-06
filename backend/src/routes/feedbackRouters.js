@@ -3,6 +3,6 @@ const express = require('express');
 
 const router = express.Router();
 
-router.post('/feedback',feedItems.postFeedback);
+router.post('/add',feedItems.postFeedback);
 
 module.exports = router;
