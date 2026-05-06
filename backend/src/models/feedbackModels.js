@@ -12,7 +12,7 @@ const FeedbackSchema = new mongoose.Schema({
     },
     mentorId:{
         required:true,
-        type:String,
+        type:String,    
     },
     rating:{
         required:true,
