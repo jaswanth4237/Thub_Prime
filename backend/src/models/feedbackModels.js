@@ -1,32 +1,36 @@
 const mongoose = require('mongoose');
 
-//Feedback Schema
-const FeedbackSchema = new mongoose.Schema({
-    classId:{
-        type:String,
-        required:true
+const feedbackSchema = new mongoose.Schema({
+
+    classId: {
+        type: String,
+        required: true
     },
-    studentId:{
-        type:String,
-        required:true
+
+    studentId: {
+        type: String,
+        required: true
     },
-    mentorId:{
-        required:true,
-        type:String,    
+
+    mentorId: {
+        type: String,
+        required: true
     },
-    rating:{
-        required:true,
-        type:Number, 
+
+    rating: {
+        type: Number,
+        min: 1,
+        max: 5,
+        required: true
     },
-    comments:{
-        required:true,
-        type:String,
-    },
-},
-    {
-        timestamps:true
+
+    comments: {
+        type: String
     }
 
-);
+},
+{
+    timestamps: true
+});
 
-module.exports = mongoose.model("FeedbackSchema",FeedbackSchema);
+module.exports = mongoose.model('feedbacks', feedbackSchema);

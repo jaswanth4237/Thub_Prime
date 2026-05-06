@@ -1,26 +1,27 @@
-const mongoose = new require('mongoose');
+const mongoose = require('mongoose');
 
-//User Schema
-const UserSchema = new mongoose.Schema({
-    userId:{
-        type:String,
-        required:true,
-        unique:true
+const userSchema = new mongoose.Schema({
+
+    userId: {
+        type: String,
+        required: true,
+        unique: true
     },
-    role:{
-        type:String,
-        required:true   
+
+    role: {
+        type: String,
+        enum: ['student', 'teacher', 'admin'],
+        required: true
     },
-    isBlocked:{
-        type:Boolean,
-        default:false,
-        required:true
-    },
+
+    isBlocked: {
+        type: Boolean,
+        default: false
+    }
+
 },
-    {
-        timestamps:true
-    },
+{
+    timestamps: true
+});
 
-);
-
-module.exports = mongoose.model("UserSchema",UserSchema);
+module.exports = mongoose.model('users', userSchema);

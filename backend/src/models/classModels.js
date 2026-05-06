@@ -1,41 +1,31 @@
-const mongoose = new require('mongoose');
+const mongoose = require('mongoose');
 
-//Class Schema
-const ClassSchema = new mongoose.Schema({
-    class:{
-        type:String,
-        required:true,
-        unique:true
+const classSchema = new mongoose.Schema({
+
+    classId: {
+        type: String,
+        required: true,
+        unique: true
     },
-    mentorId:{
-        type:String,
-        required:true   
+
+    className: {
+        type: String,
+        required: true
     },
-    moduleName:{
-        type:String,
-        required:true
+
+    mentorId: {
+        type: String,
+        required: true
     },
-    courseName:{
-        type:String,
-        required:true
-    },
-    startDate:{
-        type:Date,
-        required:true  
+
+    schedule: {
+        type: String,
+        required: true
+    }
+
 },
-    endDate:{
-        type:Date,
-        required:true
-    },
-    status:{
-        type:String,
-        required:true
-    },
-},
-    {
-        timestamps:true
-    },
+{
+    timestamps: true
+});
 
-);
-
-module.exports = mongoose.model("ClassSchema",ClassSchema);
+module.exports = mongoose.model('classes', classSchema);

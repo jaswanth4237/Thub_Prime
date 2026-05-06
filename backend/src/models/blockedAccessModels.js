@@ -1,32 +1,30 @@
 const mongoose = require('mongoose');
 
-// BlockedAccess Schema
-const BlockedAccessSchema = new mongoose.Schema({
-    studentId:{
-        type:String,
-        required:true
+const blockedSchema = new mongoose.Schema({
+
+    studentId: {
+        type: String,
+        required: true
     },
-    classId:{
-        type:String,
-        required:true
+
+    classId: {
+        type: String,
+        required: true
     },
-    reason:{
-        required:true,
-        type:String,
+
+    reason: {
+        type: String,
+        default: 'Feedback Pending'
     },
-    isBlocked:{
-        required:true,
-        type:Boolean, 
-    },
-    comments:{
-        required:true,
-        type:String,
-    },
-},
-    {
-        timestamps:true
+
+    isBlocked: {
+        type: Boolean,
+        default: true
     }
 
-);
+},
+{
+    timestamps: true
+});
 
-module.exports = mongoose.model("BlockedAccessSchema",BlockedAccessSchema);
+module.exports = mongoose.model('blocked_access', blockedSchema);
