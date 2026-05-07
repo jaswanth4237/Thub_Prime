@@ -1,3 +1,4 @@
+
 const model = require('../models/classModels');
 
 const postClass = async (req, res) => {

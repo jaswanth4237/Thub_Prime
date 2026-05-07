@@ -2,7 +2,6 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
-
 const getConnection = require('./config/db');
 
 const classRoutes = require('./routes/classRouters');
@@ -19,6 +18,7 @@ app.get('/', (req, res) => {
     res.send('Backend Running');
 });
 
+
 app.use('/class', classRoutes);
 app.use('/attendance', attendanceRoutes);
 app.use('/feedback', feedbackRoutes);
@@ -26,6 +26,7 @@ app.use('/user', userRoutes);
 app.use('/blocked', blockedRoutes);
 
 const PORT = 7100;
+
 
 app.listen(PORT, async () => {
 
