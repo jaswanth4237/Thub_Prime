@@ -4,7 +4,6 @@ const attendanceModel = require('../models/attendanceModels');
 const postFeedback = async (req, res) => {
 
     try {
-3
         const { classId, studentId, mentorId, rating, comments } = req.body;
 
         // Check attendance
