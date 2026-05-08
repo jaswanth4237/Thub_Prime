@@ -17,7 +17,7 @@ const ai = new GoogleGenAI({
 
 app.post("/analyze-feedback", async (req, res) => {
 
-  try {
+  try { 
 
     const { feedback } = req.body;
 
