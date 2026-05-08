@@ -120,9 +120,14 @@ Thub Prime prioritizes student and mentor privacy.
 
 ---
 
-## 👥 Contributors
+## 👥 Team Members
 
-- **VASAMSETTI JASWANTH** - Lead Developer
+- **VASAMSETTI JASWANTH** (Lead Developer)
+- **Thirupathi Reddy Bijjam**
+- **Durga Prasad Nanaparapu**
+- **Mohan Nakka**
+- **Dhamini Kathula**
+- **Swathi Kandula**
 
 ---
 
