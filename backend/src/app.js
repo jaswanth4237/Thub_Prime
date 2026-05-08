@@ -30,9 +30,17 @@ app.use('/encryption', encryptionRoutes);
 const PORT = 7100;
 
 
-app.listen(PORT, async () => {
+const startServer = async () => {
+    try {
+        await getConnection();
+        app.listen(PORT, () => {
+            console.log(`Server Running on ${PORT}`);
+        });
+    }
+    catch (error) {
+        console.error('Failed to start server because MongoDB is unavailable:', error);
+        process.exit(1);
+    }
+};
 
-    console.log(`Server Running on ${PORT}`);
-
-    await getConnection();
-});
+startServer();
