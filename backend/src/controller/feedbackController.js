@@ -1,8 +1,10 @@
 const feedbackModel = require('../models/feedbackModels');
 const attendanceModel = require('../models/attendanceModels');
+const { sendMessage, connectProducer } = require('../kafka/producer');
+const topics = require('../kafka/topics');
 
+// Send feedback to Kafka for asynchronous processing
 const postFeedback = async (req, res) => {
-
     try {
         const { classId, studentId, mentorId, rating, comments } = req.body;
 
@@ -20,7 +22,7 @@ const postFeedback = async (req, res) => {
             });
         }
 
-        // Prevent duplicate feedback
+        // Prevent duplicate feedback (quick check against existing collection)
         const existingFeedback = await feedbackModel.findOne({
             classId,
             studentId
@@ -33,27 +35,39 @@ const postFeedback = async (req, res) => {
             });
         }
 
-        const feedback = new feedbackModel({
+        // Build payload for Kafka
+        const payload = {
             classId,
             studentId,
-            mentorId,
+            facultyId: mentorId,
             rating,
-            comments
-        });
+            comment: comments,
+            timestamp: new Date().toISOString()
+        };
 
-        await feedback.save();
+        // Ensure producer is connected (connectProducer is idempotent)
+        try {
+            await connectProducer();
+        } catch (err) {
+            // If we cannot connect to Kafka, return error
+            console.error('Could not connect to Kafka producer:', err);
+            return res.status(503).json({ success: false, message: 'Service unavailable' });
+        }
 
-        res.status(201).json({
+        // Send event to Kafka topic
+        await sendMessage(topics.FEEDBACK_SUBMISSIONS, [
+            { key: studentId, value: JSON.stringify(payload) }
+        ]);
+
+        // Return immediate success (async processing will persist the data)
+        res.status(202).json({
             success: true,
-            message: "Feedback Submitted Successfully",
-            data: feedback
+            message: 'Feedback submitted and will be processed asynchronously'
         });
 
     }
     catch(err) {
-
         console.log(err);
-
         res.status(500).json({
             success: false,
             message: "Internal Server Error"
