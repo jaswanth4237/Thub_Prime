@@ -9,6 +9,7 @@ const attendanceRoutes = require('./routes/attendanceRouters');
 const feedbackRoutes = require('./routes/feedbackRouters');
 const userRoutes = require('./routes/userRouters');
 const blockedRoutes = require('./routes/blockedRouters');
+const encryptionRoutes = require('./routes/encryptionRouters');
 const app = express();
 
 app.use(cors());
@@ -24,6 +25,7 @@ app.use('/attendance', attendanceRoutes);
 app.use('/feedback', feedbackRoutes);
 app.use('/user', userRoutes);
 app.use('/blocked', blockedRoutes);
+app.use('/encryption', encryptionRoutes);
 
 const PORT = 7100;
 
