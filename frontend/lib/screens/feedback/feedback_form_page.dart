@@ -4,7 +4,6 @@ import '../../constants/app_colors.dart';
 import '../../responsive/responsive.dart';
 import '../../models/satisfaction_enum.dart';
 import '../../services/feedback_service.dart';
-import '../widgets/custom_card.dart';
 import '../widgets/satisfaction_button.dart';
 import 'thank_you_page.dart';
 
@@ -219,15 +218,9 @@ class _FeedbackFormPageState
                           : double.infinity,
                 ),
 
-                child: SingleChildScrollView(
-                  padding:
-                      const EdgeInsets.all(16),
-
-                  child:
-                      isDesktop
-                          ? buildDesktopLayout()
-                          : buildMobileLayout(),
-                ),
+                child: isDesktop
+                    ? buildDesktopLayout()
+                    : buildMobileLayout(),
               ),
             ),
           ),
@@ -239,129 +232,151 @@ class _FeedbackFormPageState
   }
 
   Widget buildDesktopLayout() {
-    return Row(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      child: Row(
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
 
-      children: [
-        Expanded(
-          child: Column(
-            children: [
-              buildStarCard(),
+        children: [
+          Expanded(
+            child: Column(
+              children: [
+                const SizedBox(height: 24),
+                buildSatisfactionCard(),
 
-              const SizedBox(height: 14),
+                const SizedBox(height: 14),
 
-              buildSatisfactionCard(),
-            ],
+                buildCommentCard(),
+              ],
+            ),
           ),
-        ),
 
-        const SizedBox(width: 20),
+          const SizedBox(width: 20),
 
-        Expanded(
-          child: buildCommentCard(),
-        ),
-      ],
+          Expanded(
+            child: buildCommentCard(),
+          ),
+        ],
+      ),
     );
   }
 
   Widget buildMobileLayout() {
-    return Column(
-      children: [
-        buildStarCard(),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      child: Column(
+        children: [
+          const SizedBox(height: 16),
+          buildSatisfactionCard(),
 
-        const SizedBox(height: 14),
+          const SizedBox(height: 14),
 
-        buildSatisfactionCard(),
-
-        const SizedBox(height: 14),
-
-        buildCommentCard(),
-      ],
+          buildCommentCard(),
+        ],
+      ),
     );
   }
 
   Widget buildHeader() {
-    return Container(
-      color: kGreen,
+    return SizedBox(
+      height: 300,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned.fill(
+            child: ClipPath(
+              clipper: _HeaderWaveClipper(),
+              child: Container(
+                color: kGreen,
+                child: SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 58),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                              child: Container(
+                                width: 38,
+                                height: 38,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.22),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.arrow_back,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
 
-      child: SafeArea(
-        bottom: false,
+                            const Spacer(),
 
-        child: Padding(
-          padding:
-              const EdgeInsets.fromLTRB(
-            16,
-            12,
-            16,
-            50,
-          ),
+                            Container(
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.14),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.calendar_today_outlined,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                            ),
+                          ],
+                        ),
 
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
+                        const SizedBox(height: 10),
 
-                    child: Container(
-                      width: 34,
-                      height: 34,
-
-                      decoration: BoxDecoration(
-                        color: Colors.white
-                            .withOpacity(0.22),
-
-                        shape: BoxShape.circle,
-                      ),
-
-                      child: const Icon(
-                        Icons.arrow_back,
-                        color: Colors.white,
-                        size: 18,
-                      ),
+                        Text(
+                          widget.courseName,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 19,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-
-                  const Spacer(),
-                ],
-              ),
-
-              const SizedBox(height: 6),
-
-              Text(
-                widget.courseName,
-
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
                 ),
               ),
-
-              const SizedBox(height: 3),
-
-              Text(
-                widget.topicName,
-
-                style: TextStyle(
-                  color: Colors.white
-                      .withOpacity(0.8),
-
-                  fontSize: 12,
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+
+          Positioned(
+            top: 150,
+            left: 14,
+            right: 14,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(
+                  color: const Color(0xFFFFD700),
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: buildStarCard(),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget buildStarCard() {
-    return CustomCard(
+    return Padding(
+      padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           const Text(
@@ -466,7 +481,15 @@ class _FeedbackFormPageState
   }
 
   Widget buildSatisfactionCard() {
-    return CustomCard(
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: const Color.fromARGB(255, 255, 217, 0),
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8),
       child: Column(
         crossAxisAlignment:
             CrossAxisAlignment.start,
@@ -633,7 +656,15 @@ class _FeedbackFormPageState
   }
 
   Widget buildCommentCard() {
-    return CustomCard(
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: const Color.fromARGB(255, 251, 213, 0),
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment:
             CrossAxisAlignment.start,
@@ -682,7 +713,7 @@ class _FeedbackFormPageState
             controller:
                 commentController,
 
-            maxLines: 6,
+            maxLines: 3,
 
             decoration: InputDecoration(
               hintText:
@@ -697,8 +728,9 @@ class _FeedbackFormPageState
               ),
 
               contentPadding:
-                  const EdgeInsets.all(
-                12,
+                  const EdgeInsets.symmetric(
+                vertical: 10,
+                horizontal: 12,
               ),
 
               border:
@@ -746,7 +778,7 @@ class _FeedbackFormPageState
           ),
 
           if (commentError.isNotEmpty) ...[
-            const SizedBox(height: 5),
+            const SizedBox(height: 2),
 
             Text(
               commentError,
@@ -827,4 +859,33 @@ class _FeedbackFormPageState
       ),
     );
   }
+}
+
+// Wave clipper moved outside the state class
+class _HeaderWaveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final Path path = Path();
+    path.lineTo(0, size.height - 84);
+
+    final firstControlPoint = Offset(size.width * 0.22, size.height - 10);
+    final firstEndPoint = Offset(size.width * 0.48, size.height - 66);
+
+    final secondControlPoint = Offset(size.width * 0.78, size.height - 120);
+    final secondEndPoint = Offset(size.width, size.height - 88);
+
+    path.quadraticBezierTo(
+        firstControlPoint.dx, firstControlPoint.dy, firstEndPoint.dx, firstEndPoint.dy);
+
+    path.quadraticBezierTo(
+        secondControlPoint.dx, secondControlPoint.dy, secondEndPoint.dx, secondEndPoint.dy);
+
+    path.lineTo(size.width, 0);
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }

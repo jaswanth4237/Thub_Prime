@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:device_preview/device_preview.dart';
-import 'package:frontend/screens/feedback/feedback_form_page.dart';
+import 'package:frontend/screens/course/course_detail_page.dart';
 export 'package:frontend/screens/mentorScreen.dart';
 
 class MyApp extends StatelessWidget {
@@ -16,13 +16,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         useMaterial3: true,
       ),
-      home: const FeedbackFormPage(
-        courseName: 'Thub Prime Course',
-        topicName: 'Feedback',
-        classId: 'class-001',
-        studentId: 'student-001',
-        mentorId: 'mentor-001',
-      ),
+      home: const CourseDetailPage(),
     );
   }
 }
