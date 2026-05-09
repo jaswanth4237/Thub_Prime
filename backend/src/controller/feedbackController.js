@@ -1,39 +1,34 @@
 const feedbackModel = require('../models/feedbackModels');
-const attendanceModel = require('../models/attendanceModels');
+const EncryptedFeedback = require('../models/encryptedFeedbackModel');
+const encryptUtil = require('../crypto');
 const { sendMessage, connectProducer } = require('../kafka/producer');
 const topics = require('../kafka/topics');
+
+const persistFeedbackFallback = async (payload) => {
+    await new feedbackModel({
+        classId: payload.classId,
+        studentId: payload.studentId,
+        mentorId: payload.facultyId,
+        rating: payload.rating,
+        comments: payload.comment,
+    }).save();
+
+    const encryptedFeedback = new EncryptedFeedback({
+        encryptedClassId: encryptUtil.encrypt(payload.classId || ''),
+        encryptedRating: encryptUtil.encrypt((payload.rating || 0).toString()),
+        encryptedComment: encryptUtil.encrypt(payload.comment || ''),
+        encryptedStudentId: payload.studentId ? encryptUtil.encrypt(payload.studentId) : null,
+        encryptedFacultyId: payload.facultyId ? encryptUtil.encrypt(payload.facultyId) : null,
+        createdAt: payload.timestamp ? new Date(payload.timestamp) : new Date(),
+    });
+
+    await encryptedFeedback.save();
+};
 
 // Send feedback to Kafka for asynchronous processing
 const postFeedback = async (req, res) => {
     try {
         const { classId, studentId, mentorId, rating, comments } = req.body;
-
-        // Check attendance
-        const attendance = await attendanceModel.findOne({
-            classId,
-            studentId,
-            status: 'present'
-        });
-
-        if(!attendance) {
-            return res.status(400).json({
-                success: false,
-                message: "Student did not attend class"
-            });
-        }
-
-        // Prevent duplicate feedback (quick check against existing collection)
-        const existingFeedback = await feedbackModel.findOne({
-            classId,
-            studentId
-        });
-
-        if(existingFeedback) {
-            return res.status(400).json({
-                success: false,
-                message: "Feedback already submitted"
-            });
-        }
 
         // Build payload for Kafka
         const payload = {
@@ -45,19 +40,21 @@ const postFeedback = async (req, res) => {
             timestamp: new Date().toISOString()
         };
 
-        // Ensure producer is connected (connectProducer is idempotent)
+        // Try Kafka first; if it is unavailable, store the feedback directly so the flow still works.
         try {
-            await connectProducer();
-        } catch (err) {
-            // If we cannot connect to Kafka, return error
-            console.error('Could not connect to Kafka producer:', err);
-            return res.status(503).json({ success: false, message: 'Service unavailable' });
-        }
+            const kafkaReady = await connectProducer();
 
-        // Send event to Kafka topic
-        await sendMessage(topics.FEEDBACK_SUBMISSIONS, [
-            { key: studentId, value: JSON.stringify(payload) }
-        ]);
+            if (kafkaReady) {
+                await sendMessage(topics.FEEDBACK_SUBMISSIONS, [
+                    { key: studentId, value: JSON.stringify(payload) }
+                ]);
+            } else {
+                await persistFeedbackFallback(payload);
+            }
+        } catch (err) {
+            console.warn('Kafka unavailable, saving feedback locally');
+            await persistFeedbackFallback(payload);
+        }
 
         // Return immediate success (async processing will persist the data)
         res.status(202).json({

@@ -4,7 +4,7 @@ const { encrypt, decrypt } = require('../crypto');
 
 const saveMessage = async (req, res) => {
 
-    try {
+    try {   
 
         const { message } = req.body;
 

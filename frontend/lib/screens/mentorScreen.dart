@@ -1,45 +1,25 @@
 import 'dart:convert';
 
-import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../services/api_config.dart';
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      locale: DevicePreview.locale(context),
-      builder: DevicePreview.appBuilder,
-      home: const SessionFeedbackReport(
-        classId: 'class-001',
-        totalStudents: 16,
-      ),
-    );
-  }
-}
-
-class SessionFeedbackReport extends StatefulWidget {
+class MentorScreen extends StatefulWidget {
   final String classId;
   final int totalStudents;
 
-  const SessionFeedbackReport({
+  const MentorScreen({
     super.key,
     required this.classId,
     this.totalStudents = 0,
   });
 
   @override
-  State<SessionFeedbackReport> createState() => _SessionFeedbackReportState();
+  State<MentorScreen> createState() => _MentorScreenState();
 }
 
-class _SessionFeedbackReportState extends State<SessionFeedbackReport> {
-  static const String _apiBaseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:7100',
-  );
+class _MentorScreenState extends State<MentorScreen> {
+  static final String _apiBaseUrl = getApiBaseUrl();
 
   bool _isLoading = true;
   String? _error;
@@ -71,34 +51,31 @@ class _SessionFeedbackReportState extends State<SessionFeedbackReport> {
         throw Exception('Backend error ${response.statusCode}: ${response.body}');
       }
 
-      final Map<String, dynamic> payload = Map<String, dynamic>.from(
-        jsonDecode(response.body) as Map,
-      );
+      final dynamic decoded = jsonDecode(response.body);
 
-      final dynamic savedRaw = payload['saved'];
-      final Map<String, dynamic> saved = savedRaw is Map
-          ? Map<String, dynamic>.from(savedRaw)
-          : <String, dynamic>{};
+      Map<String, dynamic> analysis = {};
+      Map<String, dynamic> saved = {};
 
-      final dynamic analysisRaw = payload['analysis'] ?? saved['analysis'];
-      final Map<String, dynamic> analysis = analysisRaw is Map
-          ? Map<String, dynamic>.from(analysisRaw)
-          : <String, dynamic>{};
+      if (decoded is Map && (decoded.containsKey('mentorPerformance') || decoded.containsKey('improvementSuggestions'))) {
+        analysis = Map<String, dynamic>.from(decoded);
+      } else if (decoded is Map && decoded.containsKey('analysis')) {
+        final dynamic analysisRaw = decoded['analysis'];
+        if (analysisRaw is Map) analysis = Map<String, dynamic>.from(analysisRaw);
+
+        final dynamic savedRaw = decoded['saved'];
+        if (savedRaw is Map) saved = Map<String, dynamic>.from(savedRaw);
+      }
 
       final dynamic suggestionsRaw = analysis['improvementSuggestions'];
       final List<String> suggestions = suggestionsRaw is List
-          ? suggestionsRaw
-                .whereType<String>()
-                .map((e) => e.trim())
-                .where((e) => e.isNotEmpty)
-                .toList()
+          ? suggestionsRaw.whereType<String>().map((e) => e.trim()).where((e) => e.isNotEmpty).toList()
           : <String>[];
 
-      final dynamic ratingRaw = saved['overallRating'];
+      final dynamic ratingRaw = analysis['overallRating'] ?? saved['overallRating'];
       final double rating = double.tryParse((ratingRaw ?? '0').toString()) ?? 0;
 
-      final dynamic countRaw = saved['feedbackCount'];
-      final int count = countRaw is num ? countRaw.toInt() : 0;
+      final dynamic countRaw = saved['feedbackCount'] ?? 0;
+      final int count = countRaw is num ? countRaw.toInt() : int.tryParse('$countRaw') ?? 0;
 
       if (!mounted) {
         return;
@@ -417,51 +394,57 @@ Widget responseRateCard(int feedbackCount, int totalStudents) {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 18),
         Row(
           children: [
-            Container(
-              height: 95,
-              width: 95,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xffe8f8e9),
-                border: Border.all(
-                  color: const Color(0xff14973a),
-                  width: 6,
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  '$rate%',
-                  style: const TextStyle(
-                    color: Color(0xff14973a),
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 28),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '$feedbackCount / $safeTotal',
+                    '$rate%',
                     style: const TextStyle(
-                      color: Color(0xff14973a),
-                      fontSize: 42,
+                      fontSize: 32,
                       fontWeight: FontWeight.bold,
+                      color: Color(0xff14973a),
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    'students submitted feedback',
-                    style: TextStyle(
+                  Text(
+                    '$feedbackCount / $safeTotal students',
+                    style: const TextStyle(
+                      fontSize: 14,
                       color: Colors.grey,
-                      fontSize: 16,
                       fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              width: 120,
+              height: 120,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    width: 120,
+                    height: 120,
+                    child: CircularProgressIndicator(
+                      value: rate / 100,
+                      strokeWidth: 12,
+                      backgroundColor: Colors.grey.shade200,
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Color(0xff14973a),
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '$rate%',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xff14973a),
                     ),
                   ),
                 ],
@@ -478,14 +461,11 @@ BoxDecoration cardDecoration() {
   return BoxDecoration(
     color: Colors.white,
     borderRadius: BorderRadius.circular(18),
-    border: Border.all(
-      color: Colors.grey.shade300,
-    ),
     boxShadow: [
       BoxShadow(
-        color: Colors.grey.withValues(alpha: 0.10),
-        blurRadius: 10,
-        offset: const Offset(0, 4),
+        color: Colors.grey.withOpacity(0.1),
+        blurRadius: 8,
+        offset: const Offset(0, 2),
       ),
     ],
   );
