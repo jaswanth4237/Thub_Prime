@@ -18,22 +18,28 @@ class ThankYouPage extends StatefulWidget {
   });
 
   @override
-  State<ThankYouPage> createState() => _ThankYouPageState();
+  State<ThankYouPage> createState() =>
+      _ThankYouPageState();
 }
 
-class _ThankYouPageState extends State<ThankYouPage>
+class _ThankYouPageState
+    extends State<ThankYouPage>
     with SingleTickerProviderStateMixin {
-  late final AnimationController animationController =
+  late final AnimationController
+  animationController =
       AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 550),
-  )..forward();
+        vsync: this,
+        duration: const Duration(
+          milliseconds: 550,
+        ),
+      )..forward();
 
-  late final Animation<double> scaleAnimation =
+  late final Animation<double>
+  scaleAnimation =
       CurvedAnimation(
-    parent: animationController,
-    curve: Curves.elasticOut,
-  );
+        parent: animationController,
+        curve: Curves.elasticOut,
+      );
 
   static const ratingLabels = [
     '',
@@ -60,14 +66,18 @@ class _ThankYouPageState extends State<ThankYouPage>
         return (
           label: 'Not Satisfied',
           bg: kRedLight,
-          color: const Color(0xFFA32D2D),
+          color: const Color(
+            0xFFA32D2D,
+          ),
         );
 
       case Satisfaction.satisfied:
         return (
           label: 'Satisfied',
           bg: kAmberLight,
-          color: const Color(0xFF854F0B),
+          color: const Color(
+            0xFF854F0B,
+          ),
         );
 
       case Satisfaction.fullySatisfied:
@@ -95,68 +105,87 @@ class _ThankYouPageState extends State<ThankYouPage>
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   maxWidth:
-                      Responsive.isDesktop(context)
+                      Responsive.isDesktop(
+                            context,
+                          )
                           ? 650
                           : double.infinity,
                 ),
 
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(
-                    20,
-                    28,
-                    20,
-                    36,
-                  ),
+                child:
+                    SingleChildScrollView(
+                      padding:
+                          const EdgeInsets.fromLTRB(
+                            20,
+                            0,
+                            20,
+                            36,
+                          ),
 
-                  child: Column(
-                    children: [
-                      buildAnimatedSuccess(),
+                      child: Column(
+                        children: [
+                          buildAnimatedStars(),
 
-                      const SizedBox(height: 14),
+                          const SizedBox(
+                            height: 2,
+                          ),
 
-                      buildAnimatedStars(),
+                          const Text(
+                            'Thank You!',
 
-                      const SizedBox(height: 14),
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight:
+                                  FontWeight.w800,
+                              color: Color(
+                                0xFF111111,
+                              ),
+                            ),
+                          ),
 
-                      const Text(
-                        'Thank You!',
+                          const SizedBox(
+                            height: 8,
+                          ),
 
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF111111),
-                        ),
+                          Text(
+                            'Your feedback for ${widget.topicName} has been recorded. '
+                            'Your response helps improve teaching quality for everyone.',
+
+                            textAlign:
+                                TextAlign.center,
+
+                            style:
+                                const TextStyle(
+                                  fontSize: 13,
+                                  color: Color(
+                                    0xFF666666,
+                                  ),
+                                  height: 1.6,
+                                ),
+                          ),
+
+                          const SizedBox(
+                            height: 18,
+                          ),
+
+                          buildSummaryCard(
+                            info,
+                          ),
+
+                          const SizedBox(
+                            height: 22,
+                          ),
+
+                          buildBackButton(),
+
+                          const SizedBox(
+                            height: 10,
+                          ),
+
+                          buildDoneButton(),
+                        ],
                       ),
-
-                      const SizedBox(height: 8),
-
-                      Text(
-                        'Your feedback for ${widget.topicName} has been recorded. '
-                        'Your response helps improve teaching quality for everyone.',
-
-                        textAlign: TextAlign.center,
-
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF666666),
-                          height: 1.6,
-                        ),
-                      ),
-
-                      const SizedBox(height: 18),
-
-                      buildSummaryCard(info),
-
-                      const SizedBox(height: 22),
-
-                      buildBackButton(),
-
-                      const SizedBox(height: 10),
-
-                      buildDoneButton(),
-                    ],
-                  ),
-                ),
+                    ),
               ),
             ),
           ),
@@ -166,33 +195,78 @@ class _ThankYouPageState extends State<ThankYouPage>
   }
 
   Widget buildHeader() {
-    return Container(
-      color: kGreen,
+    return SizedBox(
+      height: 250,
 
-      child: SafeArea(
-        bottom: false,
+      child: Stack(
+        clipBehavior: Clip.none,
 
-        child: Padding(
-          padding:
-              const EdgeInsets.fromLTRB(16, 14, 16, 16),
+        children: [
+          Positioned.fill(
+            child: ClipPath(
+              clipper:
+                  _ThankYouWaveClipper(),
 
-          child: Row(
-            mainAxisAlignment:
-                MainAxisAlignment.center,
+              child: Container(
+                color: kGreen,
 
-            children: const [
-              Text(
-                'Feedback Submitted',
+                child: SafeArea(
+                  bottom: false,
 
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.fromLTRB(
+                          16,
+                          14,
+                          16,
+                          70,
+                        ),
+
+                    child: Padding(
+                      padding: const EdgeInsets.only(top:16.0),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment:
+                                MainAxisAlignment
+                                    .center,
+                      
+                            children: const [
+                              Text(
+                                'Feedback Submitted',
+                      
+                                style: TextStyle(
+                                  color:
+                                      Colors.white,
+                                  fontSize: 17,
+                                  fontWeight:
+                                      FontWeight
+                                          .w800,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+
+          // SUCCESS ICON
+          Positioned(
+            top: 136,
+            left: 0,
+            right: 0,
+
+            child: Center(
+              child:
+                  buildAnimatedSuccess(),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -202,13 +276,19 @@ class _ThankYouPageState extends State<ThankYouPage>
       scale: scaleAnimation,
 
       child: Container(
-        width: Responsive.isDesktop(context)
-            ? 120
-            : 96,
+        width:
+            Responsive.isDesktop(
+                  context,
+                )
+                ? 120
+                : 96,
 
-        height: Responsive.isDesktop(context)
-            ? 120
-            : 96,
+        height:
+            Responsive.isDesktop(
+                  context,
+                )
+                ? 120
+                : 96,
 
         decoration: BoxDecoration(
           color: kGreenLight,
@@ -221,13 +301,17 @@ class _ThankYouPageState extends State<ThankYouPage>
         ),
 
         child: Icon(
-          Icons.check_circle_outline_rounded,
+          Icons
+              .check_circle_outline_rounded,
 
           color: kGreen,
 
-          size: Responsive.isDesktop(context)
-              ? 65
-              : 50,
+          size:
+              Responsive.isDesktop(
+                    context,
+                  )
+                  ? 65
+                  : 50,
         ),
       ),
     );
@@ -240,56 +324,79 @@ class _ThankYouPageState extends State<ThankYouPage>
 
       children: List.generate(
         5,
-        (index) => TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0, end: 1),
-
-          duration: Duration(
-            milliseconds: 300 + index * 80,
-          ),
-
-          builder: (_, value, child) {
-            return Opacity(
-              opacity: value,
-
-              child: Transform.translate(
-                offset: Offset(0, 8 * (1 - value)),
-
-                child: child,
+        (index) =>
+            TweenAnimationBuilder<double>(
+              tween: Tween(
+                begin: 0,
+                end: 1,
               ),
-            );
-          },
 
-          child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 3),
+              duration: Duration(
+                milliseconds:
+                    300 + index * 80,
+              ),
 
-            child: Icon(
-              Icons.star_rounded,
+              builder:
+                  (_, value, child) {
+                    return Opacity(
+                      opacity: value,
 
-              size:
-                  Responsive.isDesktop(context)
-                      ? 38
-                      : 30,
+                      child:
+                          Transform.translate(
+                            offset: Offset(
+                              0,
+                              8 * (1 - value),
+                            ),
 
-              color: (index + 1) <= widget.rating
-                  ? kAmber
-                  : kBorder,
+                            child: child,
+                          ),
+                    );
+                  },
+
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(
+                      horizontal: 3,
+                    ),
+
+                child: Icon(
+                  Icons.star_rounded,
+
+                  size:
+                      Responsive.isDesktop(
+                            context,
+                          )
+                          ? 38
+                          : 30,
+
+                  color:
+                      (index + 1) <=
+                              widget.rating
+                          ? kAmber
+                          : kBorder,
+                ),
+              ),
             ),
-          ),
-        ),
       ),
     );
   }
 
-  Widget buildSummaryCard(dynamic info) {
+  Widget buildSummaryCard(
+    dynamic info,
+  ) {
     return Container(
       width: double.infinity,
 
-      padding: const EdgeInsets.all(16),
+      padding:
+          const EdgeInsets.all(16),
 
       decoration: BoxDecoration(
         color: kGrayBg,
-        borderRadius: BorderRadius.circular(14),
+
+        borderRadius:
+            BorderRadius.circular(
+              14,
+            ),
       ),
 
       child: Column(
@@ -316,7 +423,8 @@ class _ThankYouPageState extends State<ThankYouPage>
 
           Row(
             mainAxisAlignment:
-                MainAxisAlignment.spaceBetween,
+                MainAxisAlignment
+                    .spaceBetween,
 
             children: [
               const Text(
@@ -324,22 +432,26 @@ class _ThankYouPageState extends State<ThankYouPage>
 
                 style: TextStyle(
                   fontSize: 13,
-                  color: Color(0xFF888888),
+                  color: Color(
+                    0xFF888888,
+                  ),
                 ),
               ),
 
               Container(
                 padding:
                     const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
 
                 decoration: BoxDecoration(
                   color: info.bg,
 
                   borderRadius:
-                      BorderRadius.circular(20),
+                      BorderRadius.circular(
+                        20,
+                      ),
                 ),
 
                 child: Text(
@@ -347,7 +459,8 @@ class _ThankYouPageState extends State<ThankYouPage>
 
                   style: TextStyle(
                     fontSize: 12,
-                    fontWeight: FontWeight.w800,
+                    fontWeight:
+                        FontWeight.w800,
                     color: info.color,
                   ),
                 ),
@@ -385,7 +498,8 @@ class _ThankYouPageState extends State<ThankYouPage>
 
             style: const TextStyle(
               fontSize: 13,
-              fontWeight: FontWeight.w700,
+              fontWeight:
+                  FontWeight.w700,
               color: kGreen,
             ),
           ),
@@ -399,7 +513,9 @@ class _ThankYouPageState extends State<ThankYouPage>
       width: double.infinity,
 
       height:
-          Responsive.isDesktop(context)
+          Responsive.isDesktop(
+                context,
+              )
               ? 60
               : 52,
 
@@ -411,17 +527,24 @@ class _ThankYouPageState extends State<ThankYouPage>
           );
         },
 
-        style: ElevatedButton.styleFrom(
-          backgroundColor: kGreen,
-          foregroundColor: Colors.white,
+        style:
+            ElevatedButton.styleFrom(
+              backgroundColor:
+                  kGreen,
 
-          shape: RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.circular(14),
-          ),
+              foregroundColor:
+                  Colors.white,
 
-          elevation: 0,
-        ),
+              shape:
+                  RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(
+                          14,
+                        ),
+                  ),
+
+              elevation: 0,
+            ),
 
         icon: const Icon(
           Icons.home_outlined,
@@ -433,7 +556,8 @@ class _ThankYouPageState extends State<ThankYouPage>
 
           style: TextStyle(
             fontSize: 15,
-            fontWeight: FontWeight.w800,
+            fontWeight:
+                FontWeight.w800,
           ),
         ),
       ),
@@ -445,7 +569,9 @@ class _ThankYouPageState extends State<ThankYouPage>
       width: double.infinity,
 
       height:
-          Responsive.isDesktop(context)
+          Responsive.isDesktop(
+                context,
+              )
               ? 60
               : 52,
 
@@ -454,26 +580,34 @@ class _ThankYouPageState extends State<ThankYouPage>
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (_) => const MentorScreen(
-                classId: 'class-001',
-              ),
+              builder:
+                  (_) =>
+                      const MentorScreen(
+                        classId:
+                            'class-001',
+                      ),
             ),
           );
         },
 
-        style: OutlinedButton.styleFrom(
-          foregroundColor: kGreen,
+        style:
+            OutlinedButton.styleFrom(
+              foregroundColor:
+                  kGreen,
 
-          side: const BorderSide(
-            color: kGreen,
-            width: 2.5,
-          ),
+              side: const BorderSide(
+                color: kGreen,
+                width: 2.5,
+              ),
 
-          shape: RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.circular(14),
-          ),
-        ),
+              shape:
+                  RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(
+                          14,
+                        ),
+                  ),
+            ),
 
         icon: const Icon(
           Icons.check_rounded,
@@ -485,10 +619,54 @@ class _ThankYouPageState extends State<ThankYouPage>
 
           style: TextStyle(
             fontSize: 15,
-            fontWeight: FontWeight.w800,
+            fontWeight:
+                FontWeight.w800,
           ),
         ),
       ),
     );
+  }
+}
+
+class _ThankYouWaveClipper
+    extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final Path path = Path();
+
+    path.lineTo(
+      0,
+      size.height - 95,
+    );
+
+    path.quadraticBezierTo(
+      size.width * 0.22,
+      size.height - 10,
+
+      size.width * 0.5,
+      size.height - 70,
+    );
+
+    path.quadraticBezierTo(
+      size.width * 0.82,
+      size.height - 135,
+
+      size.width,
+      size.height - 92,
+    );
+
+    path.lineTo(size.width, 0);
+
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(
+    covariant CustomClipper<Path>
+    oldClipper,
+  ) {
+    return false;
   }
 }
