@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
-// import 'package:flutter/services.dart';
+import 'dart:convert';
+
 import 'package:device_preview/device_preview.dart';
-
-
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -11,16 +11,116 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      useInheritedMediaQuery: true,
       locale: DevicePreview.locale(context),
       builder: DevicePreview.appBuilder,
-      home: const SessionFeedbackReport(),
+      home: const SessionFeedbackReport(
+        classId: 'class-001',
+        totalStudents: 16,
+      ),
     );
   }
 }
 
-class SessionFeedbackReport extends StatelessWidget {
-  const SessionFeedbackReport({super.key});
+class SessionFeedbackReport extends StatefulWidget {
+  final String classId;
+  final int totalStudents;
+
+  const SessionFeedbackReport({
+    super.key,
+    required this.classId,
+    this.totalStudents = 0,
+  });
+
+  @override
+  State<SessionFeedbackReport> createState() => _SessionFeedbackReportState();
+}
+
+class _SessionFeedbackReportState extends State<SessionFeedbackReport> {
+  static const String _apiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://10.0.2.2:7100',
+  );
+
+  bool _isLoading = true;
+  String? _error;
+  double _overallRating = 0;
+  int _feedbackCount = 0;
+  List<String> _suggestions = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAiSuggestions();
+  }
+
+  Future<void> _loadAiSuggestions() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final uri = Uri.parse('$_apiBaseUrl/ai/process-encrypted-feedback');
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'classId': widget.classId}),
+      );
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw Exception('Backend error ${response.statusCode}: ${response.body}');
+      }
+
+      final Map<String, dynamic> payload = Map<String, dynamic>.from(
+        jsonDecode(response.body) as Map,
+      );
+
+      final dynamic savedRaw = payload['saved'];
+      final Map<String, dynamic> saved = savedRaw is Map
+          ? Map<String, dynamic>.from(savedRaw)
+          : <String, dynamic>{};
+
+      final dynamic analysisRaw = payload['analysis'] ?? saved['analysis'];
+      final Map<String, dynamic> analysis = analysisRaw is Map
+          ? Map<String, dynamic>.from(analysisRaw)
+          : <String, dynamic>{};
+
+      final dynamic suggestionsRaw = analysis['improvementSuggestions'];
+      final List<String> suggestions = suggestionsRaw is List
+          ? suggestionsRaw
+                .whereType<String>()
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .toList()
+          : <String>[];
+
+      final dynamic ratingRaw = saved['overallRating'];
+      final double rating = double.tryParse((ratingRaw ?? '0').toString()) ?? 0;
+
+      final dynamic countRaw = saved['feedbackCount'];
+      final int count = countRaw is num ? countRaw.toInt() : 0;
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _overallRating = rating;
+        _feedbackCount = count;
+        _suggestions = suggestions;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +141,7 @@ class SessionFeedbackReport extends StatelessWidget {
           ),
         ),
         title: const Text(
-          "Session Feedback Report1111",
+          'Session Feedback Report',
           style: TextStyle(
             color: Colors.white,
             fontSize: 21,
@@ -50,34 +150,32 @@ class SessionFeedbackReport extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: _loadAiSuggestions,
             icon: const Icon(
-              Icons.more_vert,
+              Icons.refresh,
               color: Colors.white,
-              size: 30,
+              size: 26,
             ),
           ),
         ],
       ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              overallRatingCard(),
-
+              overallRatingCard(_overallRating, _feedbackCount),
               const SizedBox(height: 20),
-
-              suggestionsCard(),
-
+              suggestionsCard(
+                suggestions: _suggestions,
+                isLoading: _isLoading,
+                error: _error,
+                onRetry: _loadAiSuggestions,
+              ),
               const SizedBox(height: 20),
-
-              responseRateCard(),
-
+              responseRateCard(_feedbackCount, widget.totalStudents),
               const SizedBox(height: 26),
-
               SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -89,11 +187,9 @@ class SessionFeedbackReport extends StatelessWidget {
                     ),
                     elevation: 4,
                   ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
+                  onPressed: _loadAiSuggestions,
                   child: const Text(
-                    "Return to Home",
+                    'Refresh Suggestions',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -102,7 +198,6 @@ class SessionFeedbackReport extends StatelessWidget {
                   ),
                 ),
               ),
-
               const SizedBox(height: 20),
             ],
           ),
@@ -112,7 +207,11 @@ class SessionFeedbackReport extends StatelessWidget {
   }
 }
 
-Widget overallRatingCard() {
+Widget overallRatingCard(double overallRating, int feedbackCount) {
+  final double clampedRating = overallRating.clamp(0, 5);
+  final int fullStars = clampedRating.floor();
+  final bool hasHalf = (clampedRating - fullStars) >= 0.5;
+
   return Container(
     width: double.infinity,
     padding: const EdgeInsets.symmetric(
@@ -123,33 +222,31 @@ Widget overallRatingCard() {
     child: Column(
       children: [
         const Text(
-          "Overall Rating",
+          'Overall Rating',
           style: TextStyle(
             color: Colors.grey,
             fontSize: 17,
             fontWeight: FontWeight.bold,
           ),
         ),
-
         const SizedBox(height: 8),
-
-        const Row(
+        Row(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              "4.5",
-              style: TextStyle(
+              clampedRating.toStringAsFixed(1),
+              style: const TextStyle(
                 color: Color(0xff14973a),
                 fontSize: 58,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(width: 14),
-            Padding(
+            const SizedBox(width: 14),
+            const Padding(
               padding: EdgeInsets.only(bottom: 12),
               child: Text(
-                "/ 5 stars",
+                '/ 5 stars',
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 24,
@@ -159,33 +256,23 @@ Widget overallRatingCard() {
             ),
           ],
         ),
-
         const SizedBox(height: 8),
-
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(5, (index) {
-            if (index < 4) {
-              return const Icon(
-                Icons.star,
-                color: Colors.orange,
-                size: 40,
-              );
-            } else {
-              return const Icon(
-                Icons.star_half,
-                color: Colors.orange,
-                size: 40,
-              );
+            if (index < fullStars) {
+              return const Icon(Icons.star, color: Colors.orange, size: 40);
             }
+            if (index == fullStars && hasHalf) {
+              return const Icon(Icons.star_half, color: Colors.orange, size: 40);
+            }
+            return const Icon(Icons.star_border, color: Colors.orange, size: 40);
           }),
         ),
-
         const SizedBox(height: 18),
-
-        const Text(
-          "Based on 15 responses",
-          style: TextStyle(
+        Text(
+          'Based on $feedbackCount responses',
+          style: const TextStyle(
             color: Colors.grey,
             fontSize: 17,
             fontWeight: FontWeight.w600,
@@ -196,7 +283,12 @@ Widget overallRatingCard() {
   );
 }
 
-Widget suggestionsCard() {
+Widget suggestionsCard({
+  required List<String> suggestions,
+  required bool isLoading,
+  required String? error,
+  required VoidCallback onRetry,
+}) {
   return Container(
     width: double.infinity,
     padding: const EdgeInsets.all(18),
@@ -205,15 +297,13 @@ Widget suggestionsCard() {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          "Suggestions for Improvement",
+          'Suggestions for Improvement',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
-
         const SizedBox(height: 22),
-
         Container(
           padding: const EdgeInsets.symmetric(
             horizontal: 18,
@@ -222,28 +312,54 @@ Widget suggestionsCard() {
           decoration: BoxDecoration(
             color: const Color(0xfffbfdfc),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: Colors.grey.shade300,
-            ),
+            border: Border.all(color: Colors.grey.shade300),
           ),
-          child: const Column(
-            children: [
-              SuggestionPoint(
-                text: "Add more practical examples",
-              ),
+          child: Builder(
+            builder: (context) {
+              if (isLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-              Divider(height: 34),
+              if (error != null) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      error,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton(
+                      onPressed: onRetry,
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                );
+              }
 
-              SuggestionPoint(
-                text: "Increase interaction time with students",
-              ),
+              if (suggestions.isEmpty) {
+                return const Text(
+                  'No suggestions available yet. Generate AI suggestions from backend.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                );
+              }
 
-              Divider(height: 34),
-
-              SuggestionPoint(
-                text: "Provide additional resources after class",
-              ),
-            ],
+              return Column(
+                children: [
+                  for (int i = 0; i < suggestions.length; i++) ...[
+                    SuggestionPoint(text: suggestions[i]),
+                    if (i != suggestions.length - 1) const Divider(height: 34),
+                  ],
+                ],
+              );
+            },
           ),
         ),
       ],
@@ -267,9 +383,7 @@ class SuggestionPoint extends StatelessWidget {
           radius: 6,
           backgroundColor: Color(0xff14973a),
         ),
-
         const SizedBox(width: 18),
-
         Expanded(
           child: Text(
             text,
@@ -285,7 +399,10 @@ class SuggestionPoint extends StatelessWidget {
   }
 }
 
-Widget responseRateCard() {
+Widget responseRateCard(int feedbackCount, int totalStudents) {
+  final int safeTotal = totalStudents <= 0 ? feedbackCount : totalStudents;
+  final int rate = safeTotal == 0 ? 0 : ((feedbackCount / safeTotal) * 100).round();
+
   return Container(
     width: double.infinity,
     padding: const EdgeInsets.all(22),
@@ -294,15 +411,13 @@ Widget responseRateCard() {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          "Response Rate",
+          'Response Rate',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
-
         const SizedBox(height: 12),
-
         Row(
           children: [
             Container(
@@ -316,10 +431,10 @@ Widget responseRateCard() {
                   width: 6,
                 ),
               ),
-              child: const Center(
+              child: Center(
                 child: Text(
-                  "90%",
-                  style: TextStyle(
+                  '$rate%',
+                  style: const TextStyle(
                     color: Color(0xff14973a),
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -327,26 +442,22 @@ Widget responseRateCard() {
                 ),
               ),
             ),
-
             const SizedBox(width: 28),
-
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "15 / 16",
-                    style: TextStyle(
+                    '$feedbackCount / $safeTotal',
+                    style: const TextStyle(
                       color: Color(0xff14973a),
                       fontSize: 42,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-
-                  SizedBox(height: 4),
-
-                  Text(
-                    "students submitted feedback",
+                  const SizedBox(height: 4),
+                  const Text(
+                    'students submitted feedback',
                     style: TextStyle(
                       color: Colors.grey,
                       fontSize: 16,
@@ -372,7 +483,7 @@ BoxDecoration cardDecoration() {
     ),
     boxShadow: [
       BoxShadow(
-        color: Colors.grey.withOpacity(0.10),
+        color: Colors.grey.withValues(alpha: 0.10),
         blurRadius: 10,
         offset: const Offset(0, 4),
       ),

@@ -2,9 +2,16 @@ const crypto = require("crypto");
 
 const algorithm = "aes-256-gcm";
 
-const secretKey = Buffer.from(process.env.SECRET_KEY);
+function getSecretKey() {
+  if (!process.env.SECRET_KEY) {
+    throw new Error("SECRET_KEY is not configured");
+  }
+
+  return Buffer.from(process.env.SECRET_KEY);
+}
 
 function encrypt(text) {
+  const secretKey = getSecretKey();
 
   // Generate random IV
   const iv = crypto.randomBytes(12);
@@ -29,6 +36,7 @@ function encrypt(text) {
 }
 
 function decrypt(encryptedData, iv, authTag) {
+  const secretKey = getSecretKey();
 
   const decipher = crypto.createDecipheriv(
     algorithm,
