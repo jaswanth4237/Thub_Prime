@@ -354,10 +354,10 @@ class _ThankYouPageState
                   },
 
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(
-                      horizontal: 3,
-                    ),
+                padding: EdgeInsets.only(top:8),
+                    // const EdgeInsets.symmetric(
+                    //   horizontal: 1,
+                    // ),
 
                 child: Icon(
                   Icons.star_rounded,
