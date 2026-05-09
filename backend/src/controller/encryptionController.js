@@ -11,7 +11,7 @@ const saveMessage = async (req, res) => {
         if (!message) {
             return res.status(400).json({
                 success: false,
-                message: 'Message is required'
+                message: 'Message is requireddd'
             });
         }
 
