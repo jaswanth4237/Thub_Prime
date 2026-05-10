@@ -1,6 +1,5 @@
 # THUB PRIME: AI-POWERED STUDENT SUCCESS
 
-**GitHub URL**: https://github.com/jaswanth4237/Thub_Prime
 **Description**: A high-performance, secure, and scalable educational platform designed to streamline student feedback and attendance management. It leverages a microservices-based architecture with event-driven communication to ensure reliability, data integrity, and actionable AI-driven insights.
 
 ---
