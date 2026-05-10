@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../responsive/responsive.dart';
 import '../../models/topic_model.dart';
 import '../../services/feedback_service.dart';
+import '../../services/attendance_service.dart';
 
 import '../feedback/feedback_form_page.dart';
 import '../blockScreen.dart';
@@ -11,7 +12,16 @@ import '../widgets/progress_card.dart';
 import '../widgets/top_bar.dart';
 
 class CourseDetailPage extends StatefulWidget {
-  const CourseDetailPage({super.key});
+  final Future<Map<String, dynamic>> Function(String studentId)?
+      checkBlockedStatusOverride;
+  final Future<Map<String, dynamic>> Function(String studentId)?
+      attendanceSummaryOverride;
+
+  const CourseDetailPage({
+    super.key,
+    this.checkBlockedStatusOverride,
+    this.attendanceSummaryOverride,
+  });
 
   @override
   State<CourseDetailPage> createState() => _CourseDetailPageState();
@@ -19,7 +29,10 @@ class CourseDetailPage extends StatefulWidget {
 
 class _CourseDetailPageState extends State<CourseDetailPage> {
   bool _isCheckingStatus = true;
-  final String _studentId = 'student-001'; // In real app, get from auth
+  bool _isLoadingAttendance = true;
+  String _attendanceRatio = '0/0';
+  String _attendancePercentage = '0%';
+  final String _studentId = 'student-001';
 
   static final List<TopicModel> topics = [
     TopicModel(num: 1, name: 'Version Control System', enabled: true, done: false),
@@ -31,7 +44,14 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   @override
   void initState() {
     super.initState();
-    _checkBlockedStatus();
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    await _checkBlockedStatus();
+    if (mounted && !_isCheckingStatus) {
+      _fetchAttendance();
+    }
   }
 
   Future<void> _checkBlockedStatus() async {
@@ -40,7 +60,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     });
 
     try {
-      final status = await FeedbackService.checkBlockedStatus(_studentId);
+      final status = await (widget.checkBlockedStatusOverride ??
+          FeedbackService.checkBlockedStatus)(_studentId);
       
       if (status['success'] == true && status['isBlocked'] == true) {
         if (!mounted) return;
@@ -63,6 +84,31 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     if (mounted) {
       setState(() {
         _isCheckingStatus = false;
+      });
+    }
+  }
+
+  Future<void> _fetchAttendance() async {
+    setState(() {
+      _isLoadingAttendance = true;
+    });
+
+    try {
+      final summary = await (widget.attendanceSummaryOverride ??
+          AttendanceService.getAttendanceSummary)(_studentId);
+      if (summary['success'] == true) {
+        setState(() {
+          _attendanceRatio = '${summary['presentSessions']}/${summary['totalSessions']}';
+          _attendancePercentage = '${summary['percentage']}%';
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching attendance: $e');
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoadingAttendance = false;
       });
     }
   }
@@ -92,59 +138,67 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                 constraints: BoxConstraints(
                   maxWidth: Responsive.isDesktop(context) ? 850 : double.infinity,
                 ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      const ProgressCard(),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(14, 0, 14, 20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Modules',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFF111111),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            ModuleCard(
-                              icon: Icons.code,
-                              name: 'Git & GitHub',
-                              progress: 0.6,
-                              expanded: true,
-                              topics: topics,
-                               onFeedback: (topicName) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => FeedbackFormPage(
-                                      courseName: 'Git & GitHub',
-                                      topicName: topicName,
-                                      classId: 'class-git-001',
-                                      studentId: _studentId,
-                                      mentorId: 'mentor-001',
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                            const ModuleCard(
-                              icon: Icons.flutter_dash,
-                              name: 'Dart Programming',
-                              progress: 0.8,
-                            ),
-                            const ModuleCard(
-                              icon: Icons.phone_android,
-                              name: 'Intro to Flutter',
-                              progress: 0.4,
-                            ),
-                          ],
+                child: RefreshIndicator(
+                  onRefresh: _initializeData,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      children: [
+                        ProgressCard(
+                          attendanceRatio: _attendanceRatio,
+                          percentage: _attendancePercentage,
+                          isLoading: _isLoadingAttendance,
                         ),
-                      ),
-                    ],
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(14, 0, 14, 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Modules',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF111111),
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              ModuleCard(
+                                icon: Icons.code,
+                                name: 'Git & GitHub',
+                                progress: 0.6,
+                                expanded: true,
+                                topics: topics,
+                                 onFeedback: (topicName) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => FeedbackFormPage(
+                                        courseName: 'Git & GitHub',
+                                        topicName: topicName,
+                                        classId: 'class-git-001',
+                                        studentId: _studentId,
+                                        mentorId: 'mentor-001',
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              const ModuleCard(
+                                icon: Icons.flutter_dash,
+                                name: 'Dart Programming',
+                                progress: 0.8,
+                              ),
+                              const ModuleCard(
+                                icon: Icons.phone_android,
+                                name: 'Intro to Flutter',
+                                progress: 0.4,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

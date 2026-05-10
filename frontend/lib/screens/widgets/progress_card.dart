@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
-
 import '../../constants/app_colors.dart';
 
 class ProgressCard extends StatelessWidget {
-  const ProgressCard({super.key});
+  final String attendanceRatio;
+  final String percentage;
+  final bool isLoading;
+
+  const ProgressCard({
+    super.key,
+    this.attendanceRatio = '0/0',
+    this.percentage = '0%',
+    this.isLoading = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -37,17 +45,19 @@ class ProgressCard extends StatelessWidget {
                     ),
                   ),
                   alignment: Alignment.center,
-                  child: const Text(
-                    '89.4%',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: kGreen,
-                    ),
-                  ),
+                  child: isLoading 
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: kGreen))
+                    : Text(
+                        percentage,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          color: kGreen,
+                        ),
+                      ),
                 ),
               ),
-              _row('Attendance', '185/207'),
+              _row('Attendance', attendanceRatio),
               const Divider(color: kAmber, thickness: 1.5),
               _row('Assessments', '0/0'),
               const Divider(color: kAmber, thickness: 1.5),
