@@ -29,13 +29,13 @@ app.use('/blocked', blockedRoutes);
 app.use('/encryption', encryptionRoutes);
 app.use('/ai', aiRoutes);
 
-const PORT = 7100;
+const PORT = process.env.PORT || 7100;
 
 
 const startServer = async () => {
     try {
         await getConnection();
-        app.listen(PORT, () => {
+        app.listen(PORT, '0.0.0.0', () => {
             console.log(`Server Running on ${PORT}`);
         });
     }
