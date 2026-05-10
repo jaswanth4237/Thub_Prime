@@ -1,6 +1,7 @@
 const EncryptedFeedbacks = require('../models/encryptedFeedbackModel');
 const Classes = require('../models/classModels');
 const AiSuggestions = require('../models/aiSuggestionsModel');
+const Attendance = require('../models/attendanceModels');
 const { decrypt } = require('../crypto');
 
 let GoogleGenAIClient = null;
@@ -15,10 +16,10 @@ const buildFallbackAnalysis = ({ feedbacks, feedbackCount, overallRating }) => {
     .map((f) => (f && f.comment ? String(f.comment).trim() : ''))
     .filter((c) => c.length > 0);
 
-  const stopwords = new Set(['the','and','a','an','to','is','it','of','for','on','in','that','this','with','as','are','was','but','be','or','have','has','i','we','you','they']);
+  const stopwords = new Set(['the', 'and', 'a', 'an', 'to', 'is', 'it', 'of', 'for', 'on', 'in', 'that', 'this', 'with', 'as', 'are', 'was', 'but', 'be', 'or', 'have', 'has', 'i', 'we', 'you', 'they']);
 
-  const positiveLexicon = ['good','great','excellent','love','liked','helpful','clear','understand','engaging','interesting','useful','practical','easy'];
-  const negativeLexicon = ['bad','poor','boring','confusing','confused','unclear','fast','slow','difficult','hard','lost','frustrat','disappoint','skip','unclear','boring'];
+  const positiveLexicon = ['good', 'great', 'excellent', 'love', 'liked', 'helpful', 'clear', 'understand', 'engaging', 'interesting', 'useful', 'practical', 'easy'];
+  const negativeLexicon = ['bad', 'poor', 'boring', 'confusing', 'confused', 'unclear', 'fast', 'slow', 'difficult', 'hard', 'lost', 'frustrat', 'disappoint', 'skip', 'unclear', 'boring'];
 
   const wordCounts = new Map();
   const positivePoints = [];
@@ -99,14 +100,14 @@ const buildFallbackAnalysis = ({ feedbacks, feedbackCount, overallRating }) => {
       performanceLevel: ratingNum !== null ? (ratingNum >= 4 ? 'Strong' : ratingNum >= 3 ? 'Developing' : 'Needs Attention') : 'Unknown',
       summary: `Analysis based on ${comments.length} comment(s) and ${feedbackCount} total feedback(s).`,
     },
-    positivePoints: positivePoints.length ? Array.from(new Set(positivePoints)).slice(0,5) : ['No clear positive patterns detected from comments.'],
-    negativePoints: negativePoints.length ? Array.from(new Set(negativePoints)).slice(0,5) : ['No strong negative pattern detected from the submitted comments.'],
+    positivePoints: positivePoints.length ? Array.from(new Set(positivePoints)).slice(0, 5) : ['No clear positive patterns detected from comments.'],
+    negativePoints: negativePoints.length ? Array.from(new Set(negativePoints)).slice(0, 5) : ['No strong negative pattern detected from the submitted comments.'],
     repeatedIssues: repeatedIssues.length ? Array.from(new Set(repeatedIssues)) : ['No repeated issues detected.'],
     studentEngagement: {
       level: ratingNum !== null ? (ratingNum >= 4 ? 'Good' : 'Moderate') : (positivePoints.length > negativePoints.length ? 'Good' : 'Moderate'),
-      observation: `Top keywords: ${sortedKeywords.slice(0,6).join(', ')}`,
+      observation: `Top keywords: ${sortedKeywords.slice(0, 6).join(', ')}`,
     },
-    improvementSuggestions: suggestions.slice(0,5),
+    improvementSuggestions: suggestions.slice(0, 5),
     riskAlerts: riskAlerts.length ? riskAlerts : ['No urgent risk detected.'],
     finalRecommendation: 'Prioritize the top suggestions and gather more targeted feedback next session.',
     overallRating: ratingNum !== null ? ratingNum.toFixed(1) : overallRating,
@@ -363,7 +364,15 @@ const analyzeEncryptedFeedback = async (req, res) => {
       feedbackCount: decryptedFeedbacks.length,
     });
 
-    return res.status(200).json(analysis);
+    const totalStudentsArr = await Attendance.distinct('studentId', { classId });
+    const totalStudents = totalStudentsArr.length;
+
+    return res.status(200).json({
+      ...analysis,
+      totalStudents,
+      feedbackCount: decryptedFeedbacks.length,
+      overallRating
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: error.message });

@@ -3,7 +3,14 @@ const { Kafka } = require('kafkajs');
 const kafkaBrokers = (process.env.KAFKA_BROKERS || 'localhost:9092').split(',');
 const clientId = process.env.KAFKA_CLIENT_ID || 'thub-prime-producer';
 
-const kafka = new Kafka({ clientId, brokers: kafkaBrokers });
+const kafka = new Kafka({
+  clientId,
+  brokers: kafkaBrokers,
+  retry: {
+    initialRetryTime: 100,
+    retries: 2, // Fail quickly to avoid long startup delays and console spam
+  },
+});
 
 const producer = kafka.producer();
 let producerReady = false;

@@ -6,6 +6,10 @@ String getApiBaseUrl() {
     return envBaseUrl;
   }
 
+  if (kIsWeb) {
+    return 'http://localhost:7100';
+  }
+
   switch (defaultTargetPlatform) {
     case TargetPlatform.android:
       return 'http://10.0.2.2:7100';

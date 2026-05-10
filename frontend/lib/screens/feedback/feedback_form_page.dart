@@ -203,24 +203,21 @@ class _FeedbackFormPageState
 
     return Scaffold(
       backgroundColor: kGrayBg,
+      resizeToAvoidBottomInset: true,
 
       body: Column(
         children: [
           buildHeader(),
 
           Expanded(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth:
-                      isDesktop
-                          ? 1000
-                          : double.infinity,
+            child: SingleChildScrollView(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: isDesktop ? 1000 : double.infinity,
+                  ),
+                  child: isDesktop ? buildDesktopLayout() : buildMobileLayout(),
                 ),
-
-                child: isDesktop
-                    ? buildDesktopLayout()
-                    : buildMobileLayout(),
               ),
             ),
           ),

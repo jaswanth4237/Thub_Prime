@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:frontend/screens/course/course_detail_page.dart';
@@ -29,7 +30,10 @@ void main() async {
 
   runApp(
     DevicePreview(
-      enabled: true,
+      enabled: kIsWeb ||
+          defaultTargetPlatform == TargetPlatform.windows ||
+          defaultTargetPlatform == TargetPlatform.macOS ||
+          defaultTargetPlatform == TargetPlatform.linux,
       builder: (context) => const MyApp(),
     ),
   );
