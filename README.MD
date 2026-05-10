@@ -44,10 +44,13 @@
 
 ## ❓ Problem Statement
 
+Existing student feedback systems are inefficient, insecure, and unable to handle large volumes of feedback effectively. Manual processing and lack of intelligent analysis make it difficult for institutions to identify mentor performance issues and improve teaching quality in real time. The proposed system provides a secure, scalable, and AI-powered feedback platform with encrypted data handling, asynchronous processing, and automated insight generation.
+
 Traditional educational feedback systems often struggle with three core issues:
-1.  **Submission Bottlenecks**: High-frequency feedback at the end of sessions often crashes monolithic backends.
-2.  **Privacy Concerns**: Student comments and faculty ratings are often stored in plain text, risking exposure.
-3.  **Data Fatigue**: Administrators lack the tools to manually analyze thousands of qualitative comments, leading to missed insights.
+
+1. **Submission Bottlenecks**: High-frequency feedback at the end of sessions often crashes monolithic backends.
+2. **Privacy Concerns**: Student comments and faculty ratings are often stored in plain text, risking exposure.
+3. **Data Fatigue**: Administrators lack the tools to manually analyze thousands of qualitative comments, leading to missed insights.
 
 ---
 
