@@ -45,6 +45,9 @@ class FeedbackService {
           payload['message'] ?? 'Failed to submit feedback',
         );
       }
+    } catch (e) {
+      rethrow;
+    }
   }
 
   /// Check if student is blocked due to missing previous feedback
