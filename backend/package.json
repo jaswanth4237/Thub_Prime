@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --detectOpenHandles",
     "start": "nodemon src/app.js",
     "consumer": "node src/kafka/consumer.js",
     "ai": "nodemon src/controller/aiController.js"
@@ -22,5 +22,9 @@
     "kafkajs": "^2.2.4",
     "mongoose": "^9.6.1",
     "nodemon": "^3.1.14"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "supertest": "^7.2.2"
   }
 }
