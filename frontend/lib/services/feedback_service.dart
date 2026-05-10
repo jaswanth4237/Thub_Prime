@@ -45,8 +45,20 @@ class FeedbackService {
           payload['message'] ?? 'Failed to submit feedback',
         );
       }
+  }
+
+  /// Check if student is blocked due to missing previous feedback
+  static Future<Map<String, dynamic>> checkBlockedStatus(String studentId) async {
+    try {
+      final uri = Uri.parse('$_apiBaseUrl/blocked/status/$studentId');
+      final response = await http.get(uri).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return {'success': true, 'isBlocked': false};
     } catch (e) {
-      rethrow;
+      return {'success': false, 'isBlocked': false};
     }
   }
 }
