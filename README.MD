@@ -6,11 +6,6 @@
 
 ## 🚀 Functional Requirements
 
-### Authentication & Access
-- **Secure Login/Register**: JWT-based authentication for students and faculty.
-- **Role-Based Access Control (RBAC)**: Distinct permissions for Admin, Faculty, and Students.
-- **Identity Management**: Secure user profiling and class associations.
-
 ### Attendance Management
 - **Real-Time Tracking**: Mark and track student presence in specific class sessions.
 - **Intelligent Validation**: Automated system to ensure only students present in a class can submit feedback for that session.
