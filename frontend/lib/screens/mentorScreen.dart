@@ -60,8 +60,8 @@ class _MentorScreenState
         uri,
 
         headers: {
-          'Content-Type':
-              'application/json',
+          'Content-Type': 'application/json',
+          'x-user-role': 'mentor', // In a real app, this comes from AuthService.currentUser
         },
 
         body: jsonEncode({
