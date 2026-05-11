@@ -80,6 +80,35 @@ graph TD
 
 ---
 
+## 🐳 Docker Compose Setup
+
+The project includes a root `docker-compose.yml` that starts the complete backend microservices architecture.
+
+### Services Included
+
+- API Gateway
+- Feedback Service
+- AI Service
+- Consumer Service
+- Kafka
+- Zookeeper
+- MongoDB
+
+### Start Everything With One Command
+
+```bash
+docker-compose up
+```
+
+### Optional Commands
+
+```bash
+docker-compose up -d
+docker-compose down
+```
+
+---
+
 ## 📋 In-Scope / Out-Scope
 
 ### In-Scope

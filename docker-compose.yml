@@ -1,0 +1,110 @@
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    container_name: thub-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - '2181:2181'
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: thub-kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - '29092:29092'
+
+  mongo:
+    image: mongo:7
+    container_name: thub-mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+
+  api-gateway:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: thub-api-gateway
+    depends_on:
+      - kafka
+      - mongo
+    environment:
+      MONGO_URI: mongodb://mongo:27017/ThubPrime
+      KAFKA_BROKERS: kafka:9092
+      KAFKA_CLIENT_ID: thub-prime-gateway
+      KAFKA_CONSUMER_GROUP: feedback-processors
+      SECRET_KEY: ${SECRET_KEY:-12345678901234567890123456789012}
+      PORT: 7100
+      GATEWAY_PORT: 7100
+    command: node src/services/gateway.js
+    ports:
+      - '7100:7100'
+
+  feedback-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: thub-feedback-service
+    depends_on:
+      - kafka
+      - mongo
+    environment:
+      MONGO_URI: mongodb://mongo:27017/ThubPrime
+      KAFKA_BROKERS: kafka:9092
+      KAFKA_CLIENT_ID: thub-prime-feedback-service
+      KAFKA_CONSUMER_GROUP: feedback-processors
+      SECRET_KEY: ${SECRET_KEY:-12345678901234567890123456789012}
+      FEEDBACK_SERVICE_PORT: 7101
+    command: node src/services/feedback-service.js
+    ports:
+      - '7101:7101'
+
+  ai-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: thub-ai-service
+    depends_on:
+      - mongo
+    environment:
+      MONGO_URI: mongodb://mongo:27017/ThubPrime
+      KAFKA_BROKERS: kafka:9092
+      KAFKA_CLIENT_ID: thub-prime-ai-service
+      KAFKA_CONSUMER_GROUP: feedback-processors
+      SECRET_KEY: ${SECRET_KEY:-12345678901234567890123456789012}
+      AI_SERVICE_PORT: 7102
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    command: node src/services/ai-service.js
+    ports:
+      - '7102:7102'
+
+  consumer-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: thub-consumer-service
+    depends_on:
+      - kafka
+      - mongo
+    environment:
+      MONGO_URI: mongodb://mongo:27017/ThubPrime
+      KAFKA_BROKERS: kafka:9092
+      KAFKA_CLIENT_ID: thub-prime-consumer
+      KAFKA_CONSUMER_GROUP: feedback-processors
+      SECRET_KEY: ${SECRET_KEY:-12345678901234567890123456789012}
+    command: node src/services/consumer-service.js
+
+volumes:
+  mongo_data:

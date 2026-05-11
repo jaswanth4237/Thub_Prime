@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       title: 'Thub Prime',
       theme: ThemeData(
         primarySwatch: Colors.green,
-        useMaterial3: true,
+        useMaterial3: true,  
       ),
       home: const CourseDetailPage(),
     );
