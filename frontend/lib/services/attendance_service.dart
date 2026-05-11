@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'api_config.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AttendanceService {
-  static final String _apiBaseUrl = getApiBaseUrl();
+  static final String _apiBaseUrl = dotenv.get('API_BASE_URL', fallback: 'https://backend-thubprime.onrender.com');
 
   static Future<Map<String, dynamic>> getAttendanceSummary(String studentId) async {
     try {

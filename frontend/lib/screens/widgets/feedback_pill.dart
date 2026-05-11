@@ -18,7 +18,7 @@ class FeedbackPill extends StatelessWidget {
   Widget build(BuildContext context) {
     if (done) {
       return _pill(
-        'Done',
+        'Completed',
         bg: kGreenLight,
         textColor: kGreen,
         border: const BorderSide(color: kGreen, width: 2),

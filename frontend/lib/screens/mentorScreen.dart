@@ -23,8 +23,7 @@ class MentorScreen extends StatefulWidget {
 
 class _MentorScreenState
     extends State<MentorScreen> {
-  static final String _apiBaseUrl =
-      getApiBaseUrl();
+  String get _apiBaseUrl => getApiBaseUrl();
 
   bool _isLoading = true;
 

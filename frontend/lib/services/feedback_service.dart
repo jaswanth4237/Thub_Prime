@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'api_config.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class FeedbackService {
-  static final String _apiBaseUrl = getApiBaseUrl();
+  static final String _apiBaseUrl = dotenv.get('API_BASE_URL', fallback: 'https://backend-thubprime.onrender.com');
 
   /// Submit feedback to backend
   /// Data will be sent to Kafka for async processing (encryption and storage)
