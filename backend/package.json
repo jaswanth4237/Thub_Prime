@@ -6,6 +6,10 @@
   "scripts": {
     "test": "jest --detectOpenHandles",
     "start": "nodemon src/app.js",
+    "gateway": "nodemon src/services/gateway.js",
+    "feedback-service": "nodemon src/services/feedback-service.js",
+    "ai-service": "nodemon src/services/ai-service.js",
+    "consumer-service": "node src/services/consumer-service.js",
     "consumer": "node src/kafka/consumer.js",
     "ai": "nodemon src/controller/aiController.js"
   },
