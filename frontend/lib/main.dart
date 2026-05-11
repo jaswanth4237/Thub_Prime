@@ -3,7 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
 import 'package:frontend/screens/course/course_detail_page.dart';
+import 'package:frontend/providers/course_detail_provider.dart';
 
 export 'package:frontend/screens/mentorScreen.dart';
 
@@ -38,7 +40,14 @@ void main() async {
           defaultTargetPlatform == TargetPlatform.windows ||
           defaultTargetPlatform == TargetPlatform.macOS ||
           defaultTargetPlatform == TargetPlatform.linux,
-      builder: (context) => const MyApp(),
+      builder: (context) => MultiProvider(
+        providers: [
+          ChangeNotifierProvider<CourseDetailProvider>(
+            create: (_) => CourseDetailProvider(),
+          ),
+        ],
+        child: const MyApp(),
+      ),
     ),
   );
 }

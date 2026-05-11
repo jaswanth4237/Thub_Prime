@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import '../../responsive/responsive.dart';
 import '../../services/feedback_service.dart';
 import '../../services/attendance_service.dart';
@@ -10,8 +12,7 @@ import '../blockScreen.dart';
 import '../widgets/module_card.dart';
 import '../widgets/progress_card.dart';
 import '../widgets/top_bar.dart';
-import '../../models/course_module.dart';
-import '../../services/course_service.dart';
+import '../../providers/course_detail_provider.dart';
 
 class CourseDetailPage extends StatefulWidget {
   final Future<Map<String, dynamic>> Function(String studentId)?
@@ -30,117 +31,53 @@ class CourseDetailPage extends StatefulWidget {
 }
 
 class _CourseDetailPageState extends State<CourseDetailPage> {
-  bool _isCheckingStatus = true;
-  bool _isLoadingAttendance = true;
-  bool _isLoadingModules = true;
-  String _attendanceRatio = '0/0';
-  String _attendancePercentage = '0%';
-  final String _studentId = '66ed42436aebf032ad4404a8';
-  List<CourseModule> _modules = [];
-  String _courseName = 'Google Flutter';
-
   @override
   void initState() {
     super.initState();
-    _initializeData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeData();
+    });
   }
 
   Future<void> _initializeData() async {
-    await _checkBlockedStatus();
-    if (mounted && !_isCheckingStatus) {
-      _fetchAttendance();
-      _fetchModules();
-    }
-  }
+    final provider = context.read<CourseDetailProvider>();
+    final status = await provider.checkBlockedStatus(
+      overrideFn:
+          widget.checkBlockedStatusOverride ??
+          FeedbackService.checkBlockedStatus,
+    );
 
-  Future<void> _checkBlockedStatus() async {
-    setState(() {
-      _isCheckingStatus = true;
-    });
+    if (!mounted) return;
 
-    try {
-      final status = await (widget.checkBlockedStatusOverride ??
-          FeedbackService.checkBlockedStatus)(_studentId);
-      
-      if (status['success'] == true && status['isBlocked'] == true) {
-        if (!mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => BlockScreen(
-              studentId: _studentId,
-              classId: status['classId'] ?? 'unknown',
-              reason: status['message'] ?? 'Please provide feedback for previous session.',
-            ),
+    if (status['success'] == true && status['isBlocked'] == true) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => BlockScreen(
+            studentId: provider.studentId,
+            classId: status['classId'] ?? 'unknown',
+            reason:
+                status['message'] ??
+                'Please provide feedback for previous session.',
           ),
-        );
-        return;
-      }
-    } catch (e) {
-      debugPrint('Error checking blocked status: $e');
+        ),
+      );
+      return;
     }
 
-    if (mounted) {
-      setState(() {
-        _isCheckingStatus = false;
-      });
-    }
-  }
-
-  Future<void> _fetchAttendance() async {
-    setState(() {
-      _isLoadingAttendance = true;
-    });
-
-    try {
-      final summary = await (widget.attendanceSummaryOverride ??
-          AttendanceService.getAttendanceSummary)(_studentId);
-      if (summary['success'] == true) {
-        setState(() {
-          _attendanceRatio = '${summary['presentSessions']}/${summary['totalSessions']}';
-          _attendancePercentage = '${summary['percentage']}%';
-        });
-      }
-    } catch (e) {
-      debugPrint('Error fetching attendance: $e');
-    }
-
-    if (mounted) {
-      setState(() {
-        _isLoadingAttendance = false;
-      });
-    }
-  }
-
-  Future<void> _fetchModules() async {
-    setState(() {
-      _isLoadingModules = true;
-    });
-
-    try {
-      final modules = await CourseService.getStudentSessions(_studentId);
-      if (mounted) {
-        setState(() {
-          _modules = modules;
-          if (modules.isNotEmpty) {
-            _courseName = modules.first.technologyName;
-          }
-          _isLoadingModules = false;
-        });
-      }
-    } catch (e) {
-      debugPrint('Error fetching modules: $e');
-      if (mounted) {
-        setState(() {
-          _isLoadingModules = false;
-        });
-      }
-    }
+    await provider.fetchAttendance(
+      overrideFn:
+          widget.attendanceSummaryOverride ??
+          AttendanceService.getAttendanceSummary,
+    );
+    await provider.fetchModules();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isCheckingStatus) {
+    final provider = context.watch<CourseDetailProvider>();
+
+    if (provider.isCheckingStatus) {
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(
@@ -155,7 +92,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
       body: Column(
         children: [
           TopBar(
-            title: _courseName,
+            title: provider.courseName,
             onBack: () => Navigator.maybePop(context),
           ),
           Expanded(
@@ -172,9 +109,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ProgressCard(
-                          attendanceRatio: _attendanceRatio,
-                          percentage: _attendancePercentage,
-                          isLoading: _isLoadingAttendance,
+                          attendanceRatio: provider.attendanceRatio,
+                          percentage: provider.attendancePercentage,
+                          isLoading: provider.isLoadingAttendance,
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -195,17 +132,17 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: kAmber.withOpacity(0.5), width: 1.5),
+                                  border: Border.all(color: kAmber.withValues(alpha: 0.5), width: 1.5),
                                 ),
                                 padding: const EdgeInsets.all(16),
-                                child: _isLoadingModules
+                                child: provider.isLoadingModules
                                     ? const Center(
                                         child: Padding(
                                           padding: EdgeInsets.all(20.0),
                                           child: CircularProgressIndicator(),
                                         ),
                                       )
-                                    : _modules.isEmpty
+                                    : provider.modules.isEmpty
                                         ? const Center(
                                             child: Padding(
                                               padding: EdgeInsets.all(20.0),
@@ -213,7 +150,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                                             ),
                                           )
                                         : Column(
-                                            children: _modules.map((module) {
+                                            children: provider.modules.map((module) {
                                               return ModuleCard(
                                                 iconUrl: module.moduleIcon,
                                                 name: module.moduleName,
@@ -227,7 +164,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                                                         courseName: module.moduleName,
                                                         topicName: topicName,
                                                         classId: module.moduleId,
-                                                        studentId: _studentId,
+                                                        studentId: provider.studentId,
                                                         mentorId: 'system',
                                                       ),
                                                     ),
