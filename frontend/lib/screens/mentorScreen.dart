@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-import '../services/api_config.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../constants/app_colors.dart';
 
 class MentorScreen extends StatefulWidget {
@@ -23,7 +23,7 @@ class MentorScreen extends StatefulWidget {
 
 class _MentorScreenState
     extends State<MentorScreen> {
-  String get _apiBaseUrl => getApiBaseUrl();
+  final String _apiBaseUrl = dotenv.get('API_BASE_URL', fallback: 'https://backend-thubprime.onrender.com');
 
   bool _isLoading = true;
 

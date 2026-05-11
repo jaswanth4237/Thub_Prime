@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/satisfaction_enum.dart';
 import '../../constants/app_colors.dart';
-import '../feedback/feedback_form_page.dart';
 
 class SatisfactionButton extends StatelessWidget {
   final IconData icon;

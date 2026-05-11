@@ -7,7 +7,7 @@ class FeedbackService {
 
   /// Submit feedback to backend
   /// Data will be sent to Kafka for async processing (encryption and storage)
-  static Future<void> submitFeedback({
+  static Future<Map<String, dynamic>> submitFeedback({
     required String classId,
     required String studentId,
     required String mentorId,
@@ -19,7 +19,10 @@ class FeedbackService {
 
       final response = await http.post(
         uri,
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Accept': 'application/json',
+        },
         body: jsonEncode({
           'classId': classId,
           'studentId': studentId,
@@ -28,23 +31,25 @@ class FeedbackService {
           'comments': comments,
         }),
       ).timeout(
-        const Duration(seconds: 30),
-        onTimeout: () => throw Exception('Request timeout'),
+        const Duration(seconds: 15),
+        onTimeout: () => throw Exception('Connection timeout. Please check your internet.'),
       );
+
+      final Map<String, dynamic> payload = jsonDecode(response.body);
 
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw Exception(
-          'Backend error ${response.statusCode}: ${response.body}',
+          'Backend error ${response.statusCode}: ${payload['message'] ?? response.body}',
         );
       }
-
-      final Map<String, dynamic> payload = jsonDecode(response.body);
 
       if (payload['success'] != true) {
         throw Exception(
           payload['message'] ?? 'Failed to submit feedback',
         );
       }
+
+      return payload;
     } catch (e) {
       rethrow;
     }

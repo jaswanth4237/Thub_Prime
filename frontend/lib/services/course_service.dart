@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/course_module.dart';
-import '../models/topic_model.dart';
 
 class CourseService {
   static final String _sessionApiUrl = dotenv.get('MAYA_API_URL');
@@ -113,6 +112,7 @@ class CourseService {
     },
     {
         "module_name": "Intro to Flutter",
+        "module_id": "664ef92c31dbbb73deeae3b9",
         "module_icon": "assets/images/flutter.png",
         "topic": [
             {"topic_name": "Environment setup ", "total_sessions": 3, "attended_count": 3},
@@ -123,6 +123,7 @@ class CourseService {
     },
     {
         "module_name": "Widget",
+        "module_id": "664ef92c31dbbb73deeae3c0",
         "module_icon": "assets/images/widget.png",
         "topic": [
             {"topic_name": "Material Widgets", "total_sessions": 1, "attended_count": 1},
@@ -132,6 +133,7 @@ class CourseService {
     },
     {
         "module_name": "AI Integration",
+        "module_id": "664ef92c31dbbb73deeae3c1",
         "module_icon": "https://maya.technicalhub.io/node/module-icons/d15b6a5e53f41868679e7b9bd5ea1b2c.png",
         "topic": [
             {"topic_name": "Intro to Generative AI", "total_sessions": 1, "attended_count": 1},

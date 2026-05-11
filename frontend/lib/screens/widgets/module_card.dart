@@ -117,10 +117,7 @@ class _ModuleCardState extends State<ModuleCard> {
                   padding: const EdgeInsets.only(left: 65, top: 10),
                   child: Column(
                     children: widget.topics!.asMap().entries.map((entry) {
-                      int idx = entry.key;
                       TopicModel topic = entry.value;
-                      bool isDisabled = !topic.enabled;
-                      bool isDone = topic.done;
                       return TopicRow(
                         topic: topic,
                         onTap: widget.onFeedback != null

@@ -9,12 +9,14 @@ class ThankYouPage extends StatefulWidget {
   final String topicName;
   final int rating;
   final Satisfaction satisfaction;
+  final String classId;
 
   const ThankYouPage({
     super.key,
     required this.topicName,
     required this.rating,
     required this.satisfaction,
+    required this.classId,
   });
 
   @override
@@ -582,9 +584,9 @@ class _ThankYouPageState
             MaterialPageRoute(
               builder:
                   (_) =>
-                      const MentorScreen(
+                      MentorScreen(
                         classId:
-                            'class-001',
+                            widget.classId,
                       ),
             ),
           );

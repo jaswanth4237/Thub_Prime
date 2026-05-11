@@ -176,6 +176,7 @@ class _FeedbackFormPageState
             topicName: widget.topicName,
             rating: rating,
             satisfaction: satisfaction!,
+            classId: widget.classId,
           ),
         ),
       );
@@ -837,18 +838,24 @@ class _FeedbackFormPageState
               elevation: 0,
             ),
 
-            icon: const Icon(
-              Icons.send_rounded,
-              size: 18,
-            ),
-
-            label: const Text(
-              'Submit Feedback',
-
-              style: TextStyle(
+            icon: _isSubmitting
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Icon(
+                    Icons.send_rounded,
+                    size: 18,
+                  ),
+            label: Text(
+              _isSubmitting ? 'Submitting...' : 'Submit Feedback',
+              style: const TextStyle(
                 fontSize: 16,
-                fontWeight:
-                    FontWeight.w800,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ),
