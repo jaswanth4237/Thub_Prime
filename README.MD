@@ -1,4 +1,4 @@
-# THUB PRIME: AI-POWERED STUDENT SUCCESS
+# THUB PRIME: AI-POWERED FEEDBACK SYSTEM 
 
 **Description**: A high-performance, secure, and scalable educational platform designed to streamline student feedback and attendance management. It leverages a microservices-based architecture with event-driven communication to ensure reliability, data integrity, and actionable AI-driven insights.
 
