@@ -304,7 +304,7 @@ class _FeedbackFormPageState
                                 width: 38,
                                 height: 38,
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.22),
+                                  color: Colors.white.withValues(alpha: 0.22),
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Icon(
@@ -321,7 +321,7 @@ class _FeedbackFormPageState
                               width: 38,
                               height: 38,
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.14),
+                                color: Colors.white.withValues(alpha: 0.14),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(

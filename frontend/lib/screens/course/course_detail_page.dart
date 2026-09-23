@@ -7,7 +7,7 @@ import '../../services/attendance_service.dart';
 import '../../constants/app_colors.dart';
 
 import '../feedback/feedback_form_page.dart';
-import '../blockScreen.dart';
+import '../block_screen.dart';
 
 import '../widgets/module_card.dart';
 import '../widgets/progress_card.dart';

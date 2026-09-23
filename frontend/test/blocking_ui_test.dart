@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:frontend/screens/blockScreen.dart';
+import 'package:frontend/screens/block_screen.dart';
 import 'package:frontend/screens/course/course_detail_page.dart';
 
 void main() {

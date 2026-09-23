@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:frontend/screens/course/course_detail_page.dart';
 import 'package:frontend/providers/course_detail_provider.dart';
 
-export 'package:frontend/screens/mentorScreen.dart';
+export 'package:frontend/screens/mentor_screen.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

@@ -3,7 +3,7 @@ import '../../models/satisfaction_enum.dart';
 import '../../constants/app_colors.dart';
 import '../../responsive/responsive.dart';
 
-import '../mentorScreen.dart';
+import '../mentor_screen.dart';
 
 class ThankYouPage extends StatefulWidget {
   final String topicName;

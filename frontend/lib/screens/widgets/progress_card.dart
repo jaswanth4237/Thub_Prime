@@ -26,10 +26,10 @@ class ProgressCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: kAmber.withOpacity(0.3), width: 1.5),
+            border: Border.all(color: kAmber.withValues(alpha: 0.3), width: 1.5),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 5),
               ),
@@ -49,7 +49,7 @@ class ProgressCard extends StatelessWidget {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -62,7 +62,7 @@ class ProgressCard extends StatelessWidget {
                         width: 75,
                         height: 75,
                         decoration: BoxDecoration(
-                          color: kGreen.withOpacity(0.08),
+                          color: kGreen.withValues(alpha: 0.08),
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -72,7 +72,7 @@ class ProgressCard extends StatelessWidget {
                         child: CircularProgressIndicator(
                           value: pctValue / 100,
                           strokeWidth: 8,
-                          backgroundColor: kGreen.withOpacity(0.2),
+                          backgroundColor: kGreen.withValues(alpha: 0.2),
                           valueColor: const AlwaysStoppedAnimation<Color>(kGreen),
                         ),
                       ),

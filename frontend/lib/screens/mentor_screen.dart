@@ -811,7 +811,7 @@ BoxDecoration cardDecoration() {
     boxShadow: [
       BoxShadow(
         color: Colors.grey
-            .withOpacity(0.1),
+            .withValues(alpha: 0.1),
 
         blurRadius: 8,
 

@@ -44,7 +44,7 @@ class _ModuleCardState extends State<ModuleCard> {
                     width: 50,
                     height: 50,
                     decoration: BoxDecoration(
-                      border: Border.all(color: kAmber.withOpacity(0.5), width: 1.5),
+                      border: Border.all(color: kAmber.withValues(alpha: 0.5), width: 1.5),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     padding: const EdgeInsets.all(4),
